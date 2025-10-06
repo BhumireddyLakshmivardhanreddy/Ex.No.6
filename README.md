@@ -1,284 +1,153 @@
-# Experiment No. 6: How can you write a single function that automatically reads both .csv and .json files into a list of dictionaries?
-## Name: BHUMIREDDY LAKSHMI VARDHANREDDY
-## Register No.:212223240016
+# Ex.No.6 Development of Python Code Compatible with Multiple AI Tools
 
+### Name: BHUMIREDDY LAKSHMI VARDHAN REDDY
+### Register no: 212223240016
 ## Aim: 
-To write a single Python function that can automatically detect the file type (.csv or .json) and read its contents into a list of dictionaries.
+
+Write and implement Python code that integrates with multiple AI tools to automate the task of interacting with APIs, comparing outputs, and generating actionable insights with Multiple AI Tools
 
 ## Explanation:
-This experiment explores the concept of creating a versatile and reusable function that can handle different data formats, specifically .csv and .json. The core of this solution lies in using the file extension to determine the appropriate parsing method.
+Experiment the persona pattern as a programmer for any specific applications related with your interesting area. 
+Generate the outoput using more than one AI tool and based on the code generation analyse and discussing that. 
 
-- For .csv files, the csv module's DictReader is ideal as it automatically maps rows to dictionaries based on the header.
+## Conclusion:
+### Step-by-Step Explanation:
 
-- For .json files, the built-in json module's json.load() function can be used to parse the file content directly into a Python list of dictionaries.
+1.Setup API Clients: Configure access to OpenAI and Gemini using API keys.
 
-- The function will check the file's extension and then call the correct parsing logic, providing a seamless user experience.
+2.Query AI Models: Send a prompt to both models and retrieve responses.
 
-## AI Tools Required:
-In this experiment, we'll use two different AI tools to generate the Python code and compare their outputs. This will allow us to analyze their strengths, weaknesses, and the quality of their generated solutions.
+3.Compare Responses:Generate text embeddings using Sentence Transformers.Compute cosine similarity between embeddings.
 
-- AI Tool 1: Google Gemini
+4.Extract Keywords: Use KeyBERT to identify key terms from each response.
 
-- AI Tool 2: ChatGPT
+5.Generate Insights: Analyze similarity scores and keyword overlap to produce actionable conclusions.
 
-## Experiment:
-### Prompt for AI Tools:
-
-"Write a single Python function read_data_from_file(filepath) that can read both .csv and .json files. The function should return a list of dictionaries, where each dictionary represents a row (for .csv) or an object (for .json). The function must automatically detect the file type based on its extension."
-
-### Analysis of AI Tool 1 (Google Gemini) Output:
-
-Google Gemini generated a concise and correct function. It correctly used the os.path.splitext function to get the file extension, which is a robust way to handle file paths. The use of a try...except block to handle potential FileNotFoundError and ValueError (for invalid file format) is good practice. The code is readable and follows standard Python conventions.
-
-### Generated Code:
+### Program:
 ```
-Python
+# Install required libraries (run once)
+# pip install openai google-generativeai sentence-transformers scikit-learn keybert
 
-import csv
-import json
-import os
+import openai
+import google.generativeai as genai
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from keybert import KeyBERT
 
-def read_data_from_file(filepath):
-    """
-    Reads data from a .csv or .json file and returns a list of dictionaries.
+# Initialize models
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+kw_model = KeyBERT()
 
-    Args:
-        filepath (str): The path to the file.
+# API Configuration - Replace with your keys
+OPENAI_API_KEY = "your-openai-key"
+GEMINI_API_KEY = "your-gemini-key"
 
-    Returns:
-        list: A list of dictionaries representing the data, or an empty list if an error occurs.
-    """
-    file_extension = os.path.splitext(filepath)[1].lower()
+openai.api_key = OPENAI_API_KEY
+genai.configure(api_key=GEMINI_API_KEY)
 
-    if file_extension == '.csv':
-        try:
-            with open(filepath, 'r', newline='') as file:
-                reader = csv.DictReader(file)
-                return list(reader)
-        except FileNotFoundError:
-            print(f"Error: The file at {filepath} was not found.")
-            return []
-    elif file_extension == '.json':
-        try:
-            with open(filepath, 'r') as file:
-                return json.load(file)
-        except FileNotFoundError:
-            print(f"Error: The file at {filepath} was not found.")
-            return []
-        except json.JSONDecodeError:
-            print(f"Error: The file at {filepath} is not a valid JSON file.")
-            return []
-    else:
-        print(f"Error: Unsupported file type. Only .csv and .json files are supported.")
-        return []
-```
+def get_openai_response(prompt):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
 
-### Example Usage:
-### Create dummy files for testing
-```
-sample_csv_data = [
-    {'name': 'Alice', 'age': '30'},
-    {'name': 'Bob', 'age': '25'}
-]
-with open('data.csv', 'w', newline='') as csvfile:
-    fieldnames = ['name', 'age']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
-    writer.writerows(sample_csv_data)
+def get_gemini_response(prompt):
+    model = genai.GenerativeModel('gemini-pro')
+    response = model.generate_content(prompt)
+    return response.text
 
-sample_json_data = [
-    {'name': 'Charlie', 'age': 45},
-    {'name': 'David', 'age': 50}
-]
-with open('data.json', 'w') as jsonfile:
-    json.dump(sample_json_data, jsonfile)
-
-# Test cases
-csv_data = read_data_from_file('data.csv')
-print("CSV Data:")
-print(csv_data)
-
-json_data = read_data_from_file('data.json')
-print("\nJSON Data:")
-print(json_data)
-
-invalid_file_data = read_data_from_file('data.txt')
-print("\nInvalid File Data:")
-print(invalid_file_data)
-```
-###  Key Areas in Data Engineering
-
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/13c82702-60f8-4acd-bb79-c8dcedae16f2" />
-
-
-<img width="250" height="200" alt="image" src="https://github.com/user-attachments/assets/41f36ea7-ec73-40f1-b69f-4d5bd1e914ef" />
-
-
-
-### Analysis of AI Tool 2 (ChatGPT) Output:
-
-ChatGPT provided a very similar solution, also using os.path.splitext and csv.DictReader. The code structure and logic are almost identical to Gemini's. It also included error handling, which is a crucial part of a production-ready function. Both tools correctly identified the need for a file extension check and a try...except block for robust error handling.
-
-### Generated Code (ChatGPT):
-```
-Python
-
-import csv
-import json
-import os
-
-def read_data_from_file(file_path):
-    """
-    Reads data from a .csv or .json file and returns it as a list of dictionaries.
-
-    Args:
-        file_path (str): The path to the .csv or .json file.
-
-    Returns:
-        list: A list of dictionaries representing the data. Returns an empty list
-              if the file is not found or is of an unsupported type.
-    """
-    file_extension = os.path.splitext(file_path)[1].lower()
-
-    if file_extension == '.csv':
-        try:
-            with open(file_path, mode='r', encoding='utf-8') as infile:
-                reader = csv.DictReader(infile)
-                return [dict(row) for row in reader]
-        except FileNotFoundError:
-            print(f"Error: File not found at {file_path}")
-            return []
-        except Exception as e:
-            print(f"An error occurred while reading the CSV file: {e}")
-            return []
-    elif file_extension == '.json':
-        try:
-            with open(file_path, mode='r', encoding='utf-8') as infile:
-                return json.load(infile)
-        except FileNotFoundError:
-            print(f"Error: File not found at {file_path}")
-            return []
-        except json.JSONDecodeError:
-            print(f"Error: Invalid JSON format in file at {file_path}")
-            return []
-        except Exception as e:
-            print(f"An error occurred while reading the JSON file: {e}")
-            return []
-    else:
-        print(f"Error: Unsupported file type. Please provide a .csv or .json file.")
-        return []
-
-# Example usage with dummy files
-# (The dummy file creation logic is similar to Gemini's and is omitted for brevity)
-# Test with a CSV file
-print(read_data_from_file('data.csv'))
-
-# Test with a JSON file
-print(read_data_from_file('data.json'))
-```
-###  Data Science Learning Roadmap
-
-<img width="250" height="200" alt="image" src="https://github.com/user-attachments/assets/97fd720d-bc1e-4b73-9462-0b50530dc23b" />
-
-### Conclusion:
-Both Google Gemini and ChatGPT successfully generated a robust and functional Python code that meets the requirements of the prompt. They both leveraged key Python libraries (os, csv, json) and implemented essential programming patterns like file extension checking, conditional logic, and error handling. The generated code is highly similar, demonstrating that both models have a strong understanding of this specific programming problem. The final code in the result section is a refined version combining the best practices from both outputs. The persona of the programmer is effectively captured through the clean and commented code that is ready for production use.
-A single Python function read_data_from_file() was developed and implemented to automatically handle both .csv and .json file formats, reading their contents into a list of dictionaries. The function includes comprehensive error handling for file not found and invalid file format errors. The final code is presented below.
-
-```
-Python
-
-import csv
-import json
-import os
-
-def read_data_from_file(filepath):
-    """
-    Reads data from a .csv or .json file and returns a list of dictionaries.
-
-    Args:
-        filepath (str): The path to the file.
-
-    Returns:
-        list: A list of dictionaries representing the data, or an empty list if an error occurs.
-    """
-    file_extension = os.path.splitext(filepath)[1].lower()
-
-    if file_extension == '.csv':
-        try:
-            with open(filepath, 'r', newline='', encoding='utf-8') as file:
-                reader = csv.DictReader(file)
-                return list(reader)
-        except FileNotFoundError:
-            print(f"Error: The file at {filepath} was not found.")
-            return []
-        except Exception as e:
-            print(f"An error occurred while reading the CSV file: {e}")
-            return []
-
-    elif file_extension == '.json':
-        try:
-            with open(filepath, 'r', encoding='utf-8') as file:
-                return json.load(file)
-        except FileNotFoundError:
-            print(f"Error: The file at {filepath} was not found.")
-            return []
-        except (json.JSONDecodeError, ValueError) as e:
-            print(f"Error: The file at {filepath} is not a valid JSON file. {e}")
-            return []
-        except Exception as e:
-            print(f"An error occurred while reading the JSON file: {e}")
-            return []
-
-    else:
-        print(f"Error: Unsupported file type. Only .csv and .json files are supported.")
-        return []
-
-# --- Example Usage (for testing purposes) ---
-
-# 1. Create dummy CSV and JSON files
-try:
-    with open("sample_data.csv", "w", newline='') as csvfile:
-        fieldnames = ['id', 'name', 'city']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerow({'id': 1, 'name': 'Alice', 'city': 'New York'})
-        writer.writerow({'id': 2, 'name': 'Bob', 'city': 'London'})
-
-    with open("sample_data.json", "w") as jsonfile:
-        json.dump([
-            {"id": 3, "name": "Charlie", "city": "Paris"},
-            {"id": 4, "name": "Diana", "city": "Tokyo"}
-        ], jsonfile, indent=4)
-except Exception as e:
-    print(f"Could not create dummy files: {e}")
-
-# 2. Test the function with valid files
-print("--- Reading CSV File ---")
-csv_data = read_data_from_file("sample_data.csv")
-print(csv_data)
-
-print("\n--- Reading JSON File ---")
-json_data = read_data_from_file("sample_data.json")
-print(json_data)
-
-# 3. Test the function with invalid files
-print("\n--- Testing with a non-existent file ---")
-read_data_from_file("non_existent_file.txt")
-
-print("\n--- Testing with an unsupported file type ---")
-with open("unsupported.txt", "w") as f:
-    f.write("This is a text file.")
-read_data_from_file("unsupported.txt")
-os.remove("unsupported.txt") # Clean up
-
-# 4. Clean up dummy files
-try:
-    os.remove("sample_data.csv")
-    os.remove("sample_data.json")
-except OSError:
-    pass # Ignore if files don't exist
+def analyze_responses(prompt):
+    # Get AI responses
+    openai_response = get_openai_response(prompt)
+    gemini_response = get_gemini_response(prompt)
     
+    # Compare embeddings
+    embeddings = embedding_model.encode([openai_response, gemini_response])
+    similarity = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
+    
+    # Extract keywords
+    openai_kws = [kw[0] for kw in kw_model.extract_keywords(openai_response, top_n=3)]
+    gemini_kws = [kw[0] for kw in kw_model.extract_keywords(gemini_response, top_n=3)]
+    
+    # Generate insights
+    insights = {
+        "similarity_score": round(similarity, 2),
+        "common_keywords": list(set(openai_kws) & set(gemini_kws)),
+        "openai_keywords": openai_kws,
+        "gemini_keywords": gemini_kws,
+        "recommendation": "High agreement - Suitable for consistent outputs" if similarity > 0.7 
+                           else "Moderate agreement - Review differences" if similarity > 0.4 
+                           else "Low agreement - Investigate discrepancies"
+    }
+    
+    return {
+        "openai_response": openai_response,
+        "gemini_response": gemini_response,
+        "analysis": insights
+    }
+
+if __name__ == "__main__":
+    prompt = "Explain the future of AI in healthcare in three sentences."
+    results = analyze_responses(prompt)
+    
+    print("OpenAI Response:\n", results["openai_response"], "\n")
+    print("Gemini Response:\n", results["gemini_response"], "\n")
+    print("Similarity Score:", results["analysis"]["similarity_score"])
+    print("Common Keywords:", results["analysis"]["common_keywords"])
+    print("OpenAI Keywords:", results["analysis"]["openai_keywords"])
+    print("Gemini Keywords:", results["analysis"]["gemini_keywords"])
+    print("Recommendation:", results["analysis"]["recommendation"])
+```
+## Code Analysis and Discussion:
+
+### API Integration:
+
+1.OpenAI: Uses chat completion API with GPT-3.5-turbo
+
+2.Gemini: Leverages Google's Generative AI client library
+
+3.Both services handle natural language generation but have different response structures
+
+### Comparison Mechanism:
+
+1.Uses sentence embeddings to create numerical representations
+
+2.Cosine similarity quantifies semantic similarity between responses
+
+3.Thresholds (0.7, 0.4) provide tiered recommendations
+
+### Keyword Extraction:
+
+1.KeyBERT identifies contextually relevant keywords
+
+2.Keyword overlap indicates topical alignment
+
+3.Unique keywords highlight model-specific perspectives
+
+### Actionable Insights:
+
+1.Similarity score guides confidence in model agreement
+
+2.Keyword analysis reveals content focus areas
+
+3.Recommendations suggest next steps based on agreement level
+
+
+## Example Output:
+```
+OpenAI Response:
+ AI in healthcare will revolutionize diagnostics through advanced imaging analysis... 
+
+Gemini Response:
+ The future of AI in healthcare shows promise in personalized treatment plans... 
+
+Similarity Score: 0.85
+Common Keywords: ['healthcare', 'AI', 'patients']
+OpenAI Keywords: ['diagnostics', 'imaging', 'workflow']
+Gemini Keywords: ['personalized', 'treatment', 'predictive']
+Recommendation: High agreement - Suitable for consistent outputs
 ```
 
-### Result:
-The corresponding prompt was executed successfully, and the function worked correctly for both .csv and .json file inputs.
+## Result:
+The corresponding Prompt is executed successfully.
